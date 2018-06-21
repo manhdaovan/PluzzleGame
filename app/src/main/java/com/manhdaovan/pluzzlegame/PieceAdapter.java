@@ -3,19 +3,11 @@ package com.manhdaovan.pluzzlegame;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
-import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
-import android.widget.TextView;
-
-import org.w3c.dom.Text;
-
-import java.io.File;
-import java.util.ArrayList;
 import java.util.List;
 
 
@@ -43,7 +35,6 @@ public class PieceAdapter extends RecyclerView.Adapter<PieceAdapter.NumberViewHo
 
     @Override
     public void onBindViewHolder(NumberViewHolder holder, int position){
-        Log.e(TAG, "#" + saveImgs.get(position));
         String imgPath = saveImgs.get(position);
 
         Bitmap bitmap = BitmapFactory.decodeFile(imgPath);

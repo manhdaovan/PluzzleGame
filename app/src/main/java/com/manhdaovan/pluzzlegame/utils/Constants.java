@@ -14,7 +14,7 @@ public class Constants {
 
     public static final String[] ROW_NUM_PIECES = {"3 X", "4 X", "5 X", "6 X", "7 X", "8 X", "9 X", "10 X"};
     public static final int DEFAULT_ROW_NUM_PIECES = 4;
-    public static final String[] COLUMN_NUM_PIECES = {"3", "4", "5", "6", "7", "8", "9", "10", "11", "12", "13", "14", "15", "16", "17", "18", "19", "20"};
+    public static final String[] COLUMN_NUM_PIECES = {"3", "4", "5"};
     public static final int DEFAULT_COLUMN_NUM_PIECES = 4;
     public static final int COLUMN_OFFSET = 3;
     public static final int ROW_OFFSET = 3;
@@ -28,6 +28,10 @@ public class Constants {
 
     public static final float EACH_PIECE_WIDTH_WEIGHT = 5;
     public static final float EACH_ROW_HEIGHT_WEIGHT = 5;
+    public static final int PIECE_PADDING_LEFT = 2;
+    public static final int PIECE_PADDING_RIGHT = 2;
+    public static final int PIECE_PADDING_TOP = 2;
+    public static final int PIECE_PADDING_BOTTOM = 2;
 
     public static final String SHARED_PREF_FILE_NAME = "PUZZLE_GAME_PREF";
 

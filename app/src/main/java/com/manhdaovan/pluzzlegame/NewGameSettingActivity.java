@@ -1,7 +1,6 @@
 package com.manhdaovan.pluzzlegame;
 
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 
 // uCrop
@@ -12,33 +11,22 @@ import android.content.pm.PackageManager;
 import android.graphics.Bitmap;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Bundle;
 import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
-import android.support.v7.app.ActionBar;
 import android.support.v7.widget.Toolbar;
-import android.text.Editable;
-import android.text.TextWatcher;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
 import android.view.View;
-import android.widget.CheckBox;
-import android.widget.EditText;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.NumberPicker;
 import android.widget.RadioGroup;
-import android.widget.SeekBar;
-import android.widget.TextView;
-import android.widget.Toast;
 
 import com.manhdaovan.pluzzlegame.utils.Constants;
 import com.manhdaovan.pluzzlegame.utils.Utils;
 import com.yalantis.ucrop.UCrop;
-import com.yalantis.ucrop.UCropActivity;
 
 import java.io.File;
 import java.io.IOException;
@@ -144,24 +132,24 @@ public class NewGameSettingActivity extends ImageCroppingBase {
                 } else {
                     item.setVisible(false);
                     //TODO: Move initGameResources into async task loader
-                    Log.e(TAG, "croppedImgUri: " + croppedImgUri);
                     String resourceFolder;
 
                     try {
                         resourceFolder = initGameResources(croppedImgUri, npRowPieces.getValue(), npColumnPieces.getValue());
                         savePrefs(resourceFolder, npRowPieces.getValue(), npColumnPieces.getValue());
                     } catch (Exception e) {
-                        Log.e(TAG, "initGameResources FALSEEEEE: " + e.getMessage());
                         resourceFolder = null;
                     }
 
                     if (resourceFolder != null) {
                         Intent gameSetting = new Intent(NewGameSettingActivity.this, GamePlayActivity.class);
                         gameSetting.putExtra(Constants.INTENT_GAME_RESOURCE_FOLDER, resourceFolder);
+                        gameSetting.putExtra(Constants.INTENT_COLUMN_PIECES, npColumnPieces.getValue());
+                        gameSetting.putExtra(Constants.INTENT_ROW_PIECES, npRowPieces.getValue());
                         startActivity(gameSetting);
                         this.finish();
                     } else {
-                        Log.e(TAG, "menu_game_setting_ok FALSEEEEE: " + croppedImgUri);
+                        Utils.alert(getApplicationContext(), "Cannot split image: " + croppedImgUri);
                     }
                     item.setVisible(true);
                 }
@@ -173,28 +161,19 @@ public class NewGameSettingActivity extends ImageCroppingBase {
 
     @Override
     public void onActivityResult(int requestCode, int resultCode, Intent data) {
-        Log.e(TAG, "requestCode: " + requestCode);
-        Log.e(TAG, "resultCode: " + resultCode);
-        Log.e(TAG, "data: " + data);
-
         if (resultCode == RESULT_OK) {
             if (requestCode == Constants.REQUEST_SELECT_PICTURE) {
                 final Uri selectedUri = data.getData();
-                Log.e(TAG, "selectedUri: " + selectedUri);
                 if (selectedUri != null) {
-                    Log.e(TAG, "selectedUri != null");
                     startCropActivity(data.getData());
                 } else {
-                    Log.e(TAG, "selectedUri == null");
                     Utils.alert(this, getString(R.string.toast_cannot_retrieve_selected_image));
                 }
             } else if (requestCode == UCrop.REQUEST_CROP) {
-                Log.e(TAG, "handleCropResult");
                 handleCropResult(data);
             }
         }
         if (resultCode == UCrop.RESULT_ERROR) {
-            Log.e(TAG, "handleCropError");
             handleCropError(data);
         }
     }
@@ -277,15 +256,14 @@ public class NewGameSettingActivity extends ImageCroppingBase {
      */
     private UCrop advancedConfig(@NonNull UCrop uCrop) {
         UCrop.Options options = new UCrop.Options();
-        Log.e(TAG, options.toString());
 
         options.setCompressionFormat(Constants.DEFAULT_IMG_FORMAT);
         options.setCompressionQuality(Constants.DEFAULT_COMPRESS_QUALITY);
 
         options.setFreeStyleCropEnabled(true);
 
-        options.setCropGridColumnCount(npColumnPieces.getValue());
-        options.setCropGridRowCount(npRowPieces.getValue());
+        options.setCropGridColumnCount(npColumnPieces.getValue() - 1);
+        options.setCropGridRowCount(npRowPieces.getValue() - 1);
 
         /*
         If you want to configure how gestures work for all UCropActivity tabs
@@ -352,7 +330,6 @@ public class NewGameSettingActivity extends ImageCroppingBase {
     private void handleCropError(@NonNull Intent result) {
         final Throwable cropError = UCrop.getError(result);
         if (cropError != null) {
-            Log.e(TAG, "handleCropError: ", cropError);
             Utils.alert(this, cropError.getMessage());
         } else {
             Utils.alert(this, getString(R.string.toast_unexpected_error));
@@ -360,8 +337,6 @@ public class NewGameSettingActivity extends ImageCroppingBase {
     }
 
     private String initGameResources(Uri croppedImgUri, int rowPieces, int columnPieces) {
-        Log.e(TAG, "rowPieces: " + rowPieces + " columnPieces: " + columnPieces);
-
         if (croppedImgUri == null) {
             Utils.alert(this, "Cannot fetch image from Game Setting screen");
             this.finish();
@@ -394,7 +369,6 @@ public class NewGameSettingActivity extends ImageCroppingBase {
                 imgIdx += 1;
             }
         } catch (IOException e) {
-            Log.e(TAG, "DMMMMM " + e.getMessage());
             Utils.alert(this, "Cannot saveFile" + gameImgsFolder.getAbsolutePath());
             return null;
         }

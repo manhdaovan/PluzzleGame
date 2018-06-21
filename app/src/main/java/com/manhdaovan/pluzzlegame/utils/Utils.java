@@ -6,11 +6,9 @@ import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.support.annotation.Nullable;
-import android.util.Log;
 import android.widget.Toast;
 
 import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -20,6 +18,7 @@ import java.security.DigestInputStream;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 public class Utils {
     private static final String TAG = "Utils";
@@ -70,11 +69,9 @@ public class Utils {
 
             if (newFolder.exists() || newFolder.mkdir()) {
                 alert(context, "Create folder: " + newFolder.toString());
-                Log.e(TAG, "Create folder: " + newFolder.toString());
                 return newFolder;
             } else {
                 alert(context, "Cannot create folder: " + newFolder.toString());
-                Log.e(TAG, "Cannot create folder: " + newFolder.toString());
                 return null;
             }
         } catch (Exception e) {
@@ -88,9 +85,6 @@ public class Utils {
         List<File> dirs = new ArrayList<>();
 
         for (File f : allFiles) {
-            Log.e("DIRRR getAbsolutePath", "" + f.getAbsolutePath());
-            Log.e("DIRRR isDirectory", "" + f.isDirectory());
-//            Utils.getAllSubFilesAndFolders(f);
             switch (mode) {
                 case MODE_ALL:
                     dirs.add(f);
@@ -123,11 +117,9 @@ public class Utils {
 
             targetChannel.transferFrom(sourceChannel, 0, sourceChannel.size());
 
-            Log.e(TAG, "saveFile OK: " + targetFolder + "/" + targetFileName);
             return target;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e(TAG, "saveFile NOTTTT OK: " + targetFolder + "/" + targetFileName + ":::" + e.getMessage());
             return null;
         } finally {
             if (sourceChannel != null) {
@@ -148,11 +140,9 @@ public class Utils {
             fos = new FileOutputStream(target);
             bitmap.compress(Bitmap.CompressFormat.PNG, 100, fos);
 
-            Log.e(TAG, "save piece File OK: " + target.getAbsolutePath());
             return target;
         } catch (Exception e) {
             e.printStackTrace();
-            Log.e(TAG, "save piece NOTTTT OK: " + target.getAbsolutePath() + ":::" + e.getMessage());
             return null;
         } finally {
             if (fos != null) {
@@ -168,8 +158,6 @@ public class Utils {
         if(parent.isFile() || allFiles == null) return results;
 
         for (File f : allFiles) {
-            Log.e("DIRRR getAbsolutePath", "" + f.getAbsolutePath());
-            Log.e("DIRRR isDirectory", "" + f.isDirectory());
             results.add(f);
         }
 
@@ -179,7 +167,6 @@ public class Utils {
     public static List<Bitmap> sliceImg(String orgImg, int rows, int cols) {
         List<Bitmap> pieces = new ArrayList<>();
         Bitmap orgImgBitmap = BitmapFactory.decodeFile(orgImg);
-//        Bitmap scaledBitmap = Bitmap.createScaledBitmap(orgImgBitmap, orgImgBitmap.getWidth(), orgImgBitmap.getHeight(), true);
 
         int pieceHeight = orgImgBitmap.getHeight() / rows;
         int pieceWidth = orgImgBitmap.getWidth() / cols;
@@ -191,12 +178,8 @@ public class Utils {
             int xCo = 0;
 
             for (int y = 0; y < cols; y++) {
-
-//                pieces.add(Bitmap.createBitmap(scaledBitmap, xCo, yCo, pieceWidth, pieceHeight));
                 pieces.add(Bitmap.createBitmap(orgImgBitmap, xCo, yCo, pieceWidth, pieceHeight));
-
                 xCo += pieceWidth;
-
             }
 
             yCo += pieceHeight;
@@ -221,8 +204,12 @@ public class Utils {
     }
 
     public static void alert(Context context, String msg) {
-        Log.e(TAG, "ALERT ------ " + msg);
         Toast.makeText(context, msg, Toast.LENGTH_LONG).show();
+    }
+
+    public static int randomRange(int minimum, int maximum) {
+        Random rand = new Random();
+        return rand.nextInt((maximum - minimum) + 1) + minimum;
     }
 
     private static boolean skipPiece(String pieceName) {

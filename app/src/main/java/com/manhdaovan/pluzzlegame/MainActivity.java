@@ -2,21 +2,16 @@ package com.manhdaovan.pluzzlegame;
 
 import android.content.Intent;
 import android.content.SharedPreferences;
-import android.graphics.Color;
 import android.os.Bundle;
 import android.support.design.widget.FloatingActionButton;
-import android.support.design.widget.Snackbar;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
-import android.view.Gravity;
 import android.view.View;
 import android.view.Menu;
 import android.view.MenuItem;
 import android.widget.FrameLayout;
-import android.widget.LinearLayout;
 import android.widget.TextView;
 
 import com.manhdaovan.pluzzlegame.models.SavedItem;
@@ -24,7 +19,6 @@ import com.manhdaovan.pluzzlegame.utils.Constants;
 import com.manhdaovan.pluzzlegame.utils.Utils;
 
 import java.io.File;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -97,7 +91,6 @@ public class MainActivity extends AppCompatActivity {
         TextView noGameMsg = (TextView) findViewById(R.id.textView_noGameMsg);
 
         for (File file: allFiles){
-            Log.e("DMMM --- ", file.getName());
             savedItems.add(createSavedItemFromPref(preferences, file.getName()));
 
             File savedImg = new File(file.getAbsolutePath(), Constants.defaultCroppedFileName());
@@ -124,7 +117,5 @@ public class MainActivity extends AppCompatActivity {
         } else {
             noGameMsg.setVisibility(View.VISIBLE);
         }
-
-        Log.e("DIRRR", "" + getFilesDir().getAbsolutePath());
     }
 }

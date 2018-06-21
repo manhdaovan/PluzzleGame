@@ -7,21 +7,22 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.widget.LinearLayoutCompat;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
-import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.Toast;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.Bitmap;
 
 import com.manhdaovan.pluzzlegame.utils.Constants;
 import com.manhdaovan.pluzzlegame.utils.Utils;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 
 /**
@@ -29,6 +30,22 @@ import java.util.List;
  * status bar and navigation/system bar) with user interaction.
  */
 public class GamePlayActivity extends AppCompatActivity {
+    private class PieceInfo {
+        private int correctPos;
+        private int currentPos;
+
+        PieceInfo(int correctPosition, int currentPosition) {
+          correctPos = correctPosition;
+          currentPos = currentPosition;
+        }
+
+        public void setCurrentPos(int currentPosition) {
+            currentPos = currentPosition;
+        }
+
+        public boolean isCorrected() { return correctPos == currentPos; }
+    }
+
     private static final String TAG = GamePlayActivity.class.getSimpleName();
 
     /**
@@ -86,6 +103,7 @@ public class GamePlayActivity extends AppCompatActivity {
             hide();
         }
     };
+    private final HashMap<ImageView, PieceInfo> gameInfo = new HashMap<>();
 
     /**
      * Touch listener to use for in-layout UI controls to delay hiding the
@@ -176,25 +194,23 @@ public class GamePlayActivity extends AppCompatActivity {
     }
 
     public void initGame(String resourceFolder, int rowPieces, int columnPieces) {
-        if (resourceFolder == null) {
-            Log.e(TAG, "initGame FALSEEEE ");
-            return;
-        }
-        File gamePiecesFolder = new File(getApplicationContext().getFilesDir(), resourceFolder);
-        Log.e(TAG, "DMM 000000 " + gamePiecesFolder.getAbsolutePath());
-        List<File> allFiles = Utils.getDirs(gamePiecesFolder, Utils.MODE_FILE_ONLY);
+        List<File> pieceImgs = getAllPieceImgs(resourceFolder, rowPieces, columnPieces);
 
-        List<File> pieceImgs = new ArrayList<>();
-        for(File f: allFiles){
-            if(!f.getName().equals(Constants.defaultCroppedFileName())) pieceImgs.add(f);
-        }
-
-        if (pieceImgs.size() != rowPieces * columnPieces) {
-            Log.e(TAG, "pieceImgs.size() != rowPieces * columnPieces");
+        if(pieceImgs == null) {
+            Utils.alert(getApplicationContext(), "Cannot get pieces");
             return;
         }
 
-        gamePlaySection.setWeightSum(Constants.EACH_ROW_HEIGHT_WEIGHT* rowPieces);
+        prepareGameInfo(pieceImgs, rowPieces, columnPieces);
+        printGamePlayScreen(rowPieces, columnPieces);
+    }
+
+    private int calculatePos(int row, int col, int columnPieces) {
+        return row * columnPieces + col;
+    }
+
+    private void printGamePlayScreen(int rowPieces, int columnPieces){
+        gamePlaySection.setWeightSum(Constants.EACH_ROW_HEIGHT_WEIGHT * rowPieces);
 
         for (int numRow = 0; numRow < rowPieces; numRow ++) {
             LinearLayout row = new LinearLayout(this);
@@ -205,17 +221,78 @@ public class GamePlayActivity extends AppCompatActivity {
             row.setLayoutParams(rowParams);
 
             for (int numCol = 0; numCol < columnPieces; numCol++) {
-                ImageView piece = settingPiece(pieceImgs.get(numRow * columnPieces + numCol).getAbsolutePath());
-                row.addView(piece);
+                int piecePosition = calculatePos(numRow, numCol, rowPieces);
+                ImageView piece = getImgView(piecePosition);
+                if(piece != null) row.addView(piece);
             }
 
             gamePlaySection.addView(row);
         }
     }
 
-    private ImageView settingPiece(String pieceFilePath){
+    private ImageView getImgView(int currentPosition){
+        Iterator it = gameInfo.entrySet().iterator();
+
+        while(it.hasNext()){
+            HashMap.Entry<ImageView, PieceInfo> pair = (HashMap.Entry)it.next();
+            ImageView iv = pair.getKey();
+            PieceInfo pi = pair.getValue();
+            if(pi.currentPos == currentPosition) return iv;
+        }
+
+        return null;
+    }
+
+    private int randomPosition(HashMap<Integer, Boolean> randomed) {
+        int randomNum = Utils.randomRange(0, randomed.size() - 1);
+
+        while(randomed.get(randomNum)) { randomNum = Utils.randomRange(0, randomed.size() - 1); }
+
+        randomed.put(randomNum, true);
+        return randomNum;
+    }
+
+    private void prepareGameInfo(List<File> pieceImgs, int rowPieces, int columnPieces){
+        HashMap<Integer, Boolean> randomed = new HashMap<>();
+        for(int i = 0; i < rowPieces * columnPieces; i++){
+            randomed.put(i, false);
+        }
+
+        for (int numRow = 0; numRow < rowPieces; numRow ++) {
+            for (int numCol = 0; numCol < columnPieces; numCol++) {
+                int piecePosition = calculatePos(numRow, numCol, rowPieces);
+                ImageView piece = buildPiece(pieceImgs.get(piecePosition).getAbsolutePath());
+                int currentPosition = randomPosition(randomed);
+                gameInfo.put(piece, new PieceInfo(piecePosition, currentPosition));
+            }
+        }
+    }
+
+    private List<File> getAllPieceImgs(String resourceFolder, int rowPieces, int columnPieces){
+        if (resourceFolder == null) {
+            Utils.alert(getApplicationContext(), "Cannot find resource folder");
+            return null;
+        }
+
+        File gamePiecesFolder = new File(getApplicationContext().getFilesDir(), resourceFolder);
+        List<File> allFiles = Utils.getDirs(gamePiecesFolder, Utils.MODE_FILE_ONLY);
+
+        List<File> pieceImgs = new ArrayList<>();
+        for(File f: allFiles){
+            if(!f.getName().equals(Constants.defaultCroppedFileName())) pieceImgs.add(f);
+        }
+
+        if (pieceImgs.size() != rowPieces * columnPieces) {
+            Utils.alert(getApplicationContext(), "This image has been used before. Please try another image!");
+            return null;
+        }
+
+        return pieceImgs;
+    }
+
+    private ImageView buildPiece(String pieceFilePath){
         final ImageView piece = new ImageView(this);
-        piece.setPadding(5,5,5,5);
+        piece.setPadding(Constants.PIECE_PADDING_LEFT, Constants.PIECE_PADDING_TOP, Constants.PIECE_PADDING_RIGHT, Constants.PIECE_PADDING_BOTTOM);
         piece.setScaleType(ImageView.ScaleType.FIT_XY);
 
         LinearLayout.LayoutParams pieceParams = new LinearLayout.LayoutParams(0, LinearLayout.LayoutParams.MATCH_PARENT, Constants.EACH_PIECE_WIDTH_WEIGHT);
@@ -242,7 +319,6 @@ public class GamePlayActivity extends AppCompatActivity {
     }
 
     private boolean isNeedCheckSwap(){
-        Log.e(TAG, "isNeedCheckSwap: " + selectingPieces.size());
         return selectingPieces.size() == 2;
     }
 
@@ -258,7 +334,47 @@ public class GamePlayActivity extends AppCompatActivity {
 
     private boolean swap(){
         if (selectingPieces.size() < 1) return false;
+
+        Log.e(TAG,"Complete ----- " + isGameCompleted());
+        ImageView tmpPiece = new ImageView(this);
+        ImageView firstPiece = selectingPieces.get(0);
+        ImageView secondPiece = selectingPieces.get(1);
+
+        copyBitmap(firstPiece, tmpPiece);
+        copyBitmap(secondPiece, firstPiece);
+        copyBitmap(tmpPiece, secondPiece);
+        updateCurrentPosition(firstPiece, secondPiece);
+
         return true;
+    }
+
+    private boolean isGameCompleted() {
+        Iterator it = gameInfo.entrySet().iterator();
+        boolean isGameCompleted = true;
+
+        while (it.hasNext()){
+            HashMap.Entry<ImageView, PieceInfo> pair = (HashMap.Entry)it.next();
+            isGameCompleted = isGameCompleted && pair.getValue().isCorrected();
+        }
+
+        return isGameCompleted;
+    }
+
+    private void updateCurrentPosition(ImageView iv1, ImageView iv2) {
+        PieceInfo iv1Info = gameInfo.get(iv1);
+        PieceInfo iv2Info = gameInfo.get(iv2);
+        int tmpPos = iv1Info.currentPos;
+
+        iv1Info.setCurrentPos(iv2Info.currentPos);
+        iv2Info.setCurrentPos(tmpPos);
+        gameInfo.put(iv1, iv1Info);
+        gameInfo.put(iv2, iv2Info);
+    }
+
+    private void copyBitmap(ImageView srcImgView, ImageView tgImgView){
+        BitmapDrawable drawable = (BitmapDrawable) srcImgView.getDrawable();
+        Bitmap bitmap = drawable.getBitmap();
+        tgImgView.setImageBitmap(bitmap);
     }
 
     private void toggle() {
