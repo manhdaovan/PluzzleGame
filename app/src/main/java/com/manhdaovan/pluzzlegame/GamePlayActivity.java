@@ -221,7 +221,7 @@ public class GamePlayActivity extends AppCompatActivity {
             row.setLayoutParams(rowParams);
 
             for (int numCol = 0; numCol < columnPieces; numCol++) {
-                int piecePosition = calculatePos(numRow, numCol, rowPieces);
+                int piecePosition = calculatePos(numRow, numCol, columnPieces);
                 ImageView piece = getImgView(piecePosition);
                 if(piece != null) row.addView(piece);
             }
@@ -260,7 +260,7 @@ public class GamePlayActivity extends AppCompatActivity {
 
         for (int numRow = 0; numRow < rowPieces; numRow ++) {
             for (int numCol = 0; numCol < columnPieces; numCol++) {
-                int piecePosition = calculatePos(numRow, numCol, rowPieces);
+                int piecePosition = calculatePos(numRow, numCol, columnPieces);
                 ImageView piece = buildPiece(pieceImgs.get(piecePosition).getAbsolutePath());
                 int currentPosition = randomPosition(randomed);
                 gameInfo.put(piece, new PieceInfo(piecePosition, currentPosition));
@@ -349,14 +349,16 @@ public class GamePlayActivity extends AppCompatActivity {
     }
 
     private boolean isGameCompleted() {
+        Log.e(TAG,"isGameCompleted ----- start");
         Iterator it = gameInfo.entrySet().iterator();
         boolean isGameCompleted = true;
 
         while (it.hasNext()){
             HashMap.Entry<ImageView, PieceInfo> pair = (HashMap.Entry)it.next();
+            Log.e(TAG,"position ----- " + pair.getValue().currentPos + "|" + pair.getValue().correctPos);
             isGameCompleted = isGameCompleted && pair.getValue().isCorrected();
         }
-
+        Log.e(TAG,"isGameCompleted ----- end");
         return isGameCompleted;
     }
 

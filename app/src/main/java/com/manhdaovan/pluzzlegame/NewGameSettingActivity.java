@@ -15,6 +15,7 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.Toolbar;
+import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -68,12 +69,16 @@ public class NewGameSettingActivity extends ImageCroppingBase {
         npRowPieces.setMinValue(Constants.ROW_OFFSET);
         npRowPieces.setMaxValue(Constants.ROW_OFFSET + Constants.ROW_NUM_PIECES.length - 1);
         npRowPieces.setValue(Constants.DEFAULT_ROW_NUM_PIECES);
+        int defaultNumRows = Utils.randomRange(Constants.ROW_OFFSET, Constants.ROW_OFFSET + Constants.ROW_NUM_PIECES.length - 1);
+        npRowPieces.setValue(defaultNumRows);
 
         npColumnPieces = (NumberPicker) findViewById(R.id.np_column);
         npColumnPieces.setDisplayedValues(Constants.COLUMN_NUM_PIECES);
         npColumnPieces.setMinValue(Constants.COLUMN_OFFSET);
         npColumnPieces.setMaxValue(Constants.COLUMN_OFFSET + Constants.COLUMN_NUM_PIECES.length - 1);
         npColumnPieces.setValue(Constants.DEFAULT_COLUMN_NUM_PIECES);
+        int defaultNumCols = Utils.randomRange(Constants.COLUMN_OFFSET, Constants.COLUMN_OFFSET + Constants.COLUMN_NUM_PIECES.length - 1);
+        npColumnPieces.setValue(defaultNumCols);
 
         rdGridSize = (RadioGroup) findViewById(R.id.radio_grid_size);
         rdGridSize.check(R.id.setting_grid_size_random);
@@ -134,9 +139,12 @@ public class NewGameSettingActivity extends ImageCroppingBase {
                     //TODO: Move initGameResources into async task loader
                     String resourceFolder;
 
+                    int numRows = npRowPieces.getValue();
+                    int numCols = npColumnPieces.getValue();
+
                     try {
-                        resourceFolder = initGameResources(croppedImgUri, npRowPieces.getValue(), npColumnPieces.getValue());
-                        savePrefs(resourceFolder, npRowPieces.getValue(), npColumnPieces.getValue());
+                        resourceFolder = initGameResources(croppedImgUri, numRows, numCols);
+                        savePrefs(resourceFolder, numRows, numCols);
                     } catch (Exception e) {
                         resourceFolder = null;
                     }
@@ -144,8 +152,9 @@ public class NewGameSettingActivity extends ImageCroppingBase {
                     if (resourceFolder != null) {
                         Intent gameSetting = new Intent(NewGameSettingActivity.this, GamePlayActivity.class);
                         gameSetting.putExtra(Constants.INTENT_GAME_RESOURCE_FOLDER, resourceFolder);
-                        gameSetting.putExtra(Constants.INTENT_COLUMN_PIECES, npColumnPieces.getValue());
-                        gameSetting.putExtra(Constants.INTENT_ROW_PIECES, npRowPieces.getValue());
+                        gameSetting.putExtra(Constants.INTENT_ROW_PIECES, numRows);
+                        gameSetting.putExtra(Constants.INTENT_COLUMN_PIECES, numCols);
+
                         startActivity(gameSetting);
                         this.finish();
                     } else {
