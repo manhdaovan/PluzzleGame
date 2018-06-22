@@ -15,7 +15,6 @@ import android.support.annotation.IdRes;
 import android.support.annotation.NonNull;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.widget.Toolbar;
-import android.util.Log;
 import android.view.Menu;
 import android.view.MenuInflater;
 import android.view.MenuItem;
@@ -327,7 +326,6 @@ public class NewGameSettingActivity extends ImageCroppingBase {
     private void handleCropResult(@NonNull Intent result) {
         croppedImgUri = UCrop.getOutput(result);
         if (croppedImgUri != null) {
-            Utils.alert(getApplicationContext(), "VKL handleCropResult");
             selectedImg.setImageDrawable(null); // Force redraw ImageView
             selectedImg.setImageURI(croppedImgUri);
         } else {

@@ -8,5 +8,6 @@
     <color name="green">#1DACC8</color>
     <color name="gray">#6A6A6A</color>
 
-    <color name="black_overlay">#66000000</color>
+    <color name="black_overlay">#660000</color>
+    <color name="dark_white">#CECECE</color>
 </resources>

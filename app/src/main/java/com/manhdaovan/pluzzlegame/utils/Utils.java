@@ -68,7 +68,6 @@ public class Utils {
             File newFolder = new File(fileDir.getAbsolutePath() + "/" + folderName);
 
             if (newFolder.exists() || newFolder.mkdir()) {
-                alert(context, "Create folder: " + newFolder.toString());
                 return newFolder;
             } else {
                 alert(context, "Cannot create folder: " + newFolder.toString());
