@@ -15,20 +15,20 @@
         android:layout_width="match_parent"
         android:layout_height="match_parent"
         android:layout_gravity="bottom|center_horizontal"
-        android:background="@color/black_overlay"
+        android:background="@color/dark_white"
         android:orientation="vertical"
         tools:ignore="UselessParent">
 
     </LinearLayout>
 
     <android.support.design.widget.FloatingActionButton
-        android:id="@+id/fullscreen_content"
+        android:id="@+id/btn_menu_share"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_gravity="bottom|end"
         android:layout_margin="@dimen/fab_margin"
         app:backgroundTint="@color/actionBar"
-        app:srcCompat="@android:drawable/ic_input_add" />
+        app:srcCompat="@android:drawable/ic_menu_share" />
 
     <!-- This FrameLayout insets its children based on system windows using
          android:fitsSystemWindows. -->
@@ -47,13 +47,15 @@
             android:orientation="horizontal"
             tools:ignore="UselessParent">
 
+            <!--
             <Button
                 android:id="@+id/dummy_button"
-                style="?metaButtonBarButtonStyle"
+                style="?colorButtonNormal"
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
-                android:text="@string/dummy_button" />
+                android:drawableLeft="@android:drawable/ic_menu_share"
+                android:text="@string/share" /> -->
 
         </LinearLayout>
     </FrameLayout>
