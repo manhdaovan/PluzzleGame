@@ -9,6 +9,7 @@ import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
 import android.util.Log;
+import android.util.SparseBooleanArray;
 import android.view.MenuItem;
 import android.view.MotionEvent;
 import android.view.View;
@@ -245,7 +246,7 @@ public class GamePlayActivity extends AppCompatActivity {
         return null;
     }
 
-    private int randomPosition(HashMap<Integer, Boolean> randomed) {
+    private int randomPosition(SparseBooleanArray randomed) {
         int randomNum = Utils.randomRange(0, randomed.size() - 1);
 
         while(randomed.get(randomNum)) { randomNum = Utils.randomRange(0, randomed.size() - 1); }
@@ -255,7 +256,7 @@ public class GamePlayActivity extends AppCompatActivity {
     }
 
     private void prepareGameInfo(List<File> pieceImgs, int rowPieces, int columnPieces){
-        HashMap<Integer, Boolean> randomed = new HashMap<>();
+        SparseBooleanArray randomed = new SparseBooleanArray();
         for(int i = 0; i < rowPieces * columnPieces; i++){
             randomed.put(i, false);
         }
